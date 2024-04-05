@@ -9,7 +9,7 @@ FAC = 100 * h * c
 class Morse:
     """A class representing the Morse oscillator model of a diatomic."""
 
-    def __init__(self, mA, mB, we, wexe, re, Te=0, dipole=0, A0=0):
+    def __init__(self, mA, mB, we, wexe, re, Te=0, dipole=0, A0=0, omega_p = 0, matter_dim=2, photon_dim=2):
         """Initialize the Morse model for a diatomic molecule.
 
         mA, mB are the atom masses (atomic mass units).
@@ -20,6 +20,12 @@ class Morse:
         dipole is the total dipole moment in atomic units
 
         """
+        # size of photon and matter basis
+        self.matter_dim = matter_dim
+        self.photon_dim = photon_dim
+
+        # photon energy
+        self.omega_p = omega_p
         # magnitude of the vector potential
         self.A0_au = A0
         # dipole moment
@@ -247,7 +253,7 @@ class Morse:
             psi_plot = psi*scaling + self.Emorse(v)/FAC + self.Te
             ax.plot(x*1.e10, psi_plot, **kwargs)
 
-    def coupling_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
+    def compute_coupling_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements  
         z / m * <m|<p| \hat{p} | p'>|m'> = i * z * (E_m - E_m') A_0 * <m|\hat{x}|m'> * <p|(b^+ + b)|p'>
         """
@@ -268,6 +274,90 @@ class Morse:
 
         coupling_val = ci * z * deltaE * A0 * x_val * (np.sqrt(ket_p + 1 ) * (bra_p == ket_p + 1) + np.sqrt(ket_p) * (bra_p == ket_p - 1))
         return coupling_val
+    
+    def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
+        """ Function to compute the matrix elements
+            (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
+        """
+        # must be diagonal
+        val = 0
+        if bra_m == ket_m and bra_p == ket_p:
+            # collect terms
+            z = self.q_au
+            A0 = self.A0_au
+            omega = self.omega_p
+            m = self.mu_au
+
+            # compute the matrix element
+            val = (z ** 2 / m * A0 + omega) * (ket_m + 1/2)
+
+        return val
+    
+    def compute_diamagnetic_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
+        """ Function to compute the matrix elements
+            z^2 / 2m * A_0 <m|m'><p | (b^+ b^+ + bb) |p'>
+        """
+        # must be diagonal in matter states
+        val = 0
+        if bra_m == ket_m:
+            z = self.q_au
+            A0 = self.A0_au
+            m = self.mu_au
+
+            # get <p|bb|p'>
+            if bra_p == ket_p - 2:
+                val = z ** 2 / (2 * m) * A0 * np.sqrt(ket_p) * np.sqrt(ket_p - 1)
+
+            # get <p|b^+ b^+ |p'>
+            if bra_p == ket_p + 2:
+                val = z ** 2 / (2 * m) * A0 * np.sqrt(ket_p+1) * np.sqrt(ket_p + 2)
+
+        return val
+    
+    def compute_matter_element(self, bra_m, bra_p, ket_m, ket_p):
+        """ Function to compute the matrix elements
+            <m| p^2/2m + V(x) |m'><p|p'>
+        """
+        # must be diagonal in all states
+        val = 0
+        if bra_m == ket_m and bra_p == ket_p:
+            val = self.we_au * (ket_m + 1/2) - self.wexe_au * (ket_m + 1/2) ** 2
+
+        return val
+    
+
+    def build_basis(self):
+        self.basis = []
+        for i in range(self.photon_dim):
+            for j in range(self.matter_dim):
+                self.basis.append((j,i))
+
+    def build_p_dot_A_Hamiltonian(self):
+        # build the basis
+        self.build_basis()
+        dim = len(self.basis)
+
+        self.H_p_dot_A = np.zeros((dim,dim), dtype=complex)
+        for i in range(dim):
+            bra_m = self.basis[i][0]
+            bra_p = self.basis[i][1]
+            for j in range(dim):
+                ket_m = self.basis[j][0]
+                ket_p = self.basis[j][1]
+
+                H_matter = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
+                H_diam   = self.compute_diamagnetic_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
+                H_pho    = self.compute_photon_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
+                H_coup   = self.compute_coupling_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
+                self.H_p_dot_A[i,j] = H_matter + H_diam + H_pho + H_coup
+
+
+
+
+    
+
+
+
     
     def position_matrix_element(self, i, j):
         """ A function to compute position matrix elements between states i and j using grid x
