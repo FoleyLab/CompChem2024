@@ -1,0 +1,8 @@
+molecule hf {
+H
+F 1 0.9
+
+}
+
+set basis 6-311++G**
+optimize('ccsd', dertype='energy')

@@ -1,0 +1,118 @@
+
+    -----------------------------------------------------------------------
+          Psi4: An Open-Source Ab Initio Electronic Structure Package
+                               Psi4 1.9a1.dev47 
+
+                         Git: Rev {master} 97f4680 
+
+
+    D. G. A. Smith, L. A. Burns, A. C. Simmonett, R. M. Parrish,
+    M. C. Schieber, R. Galvelis, P. Kraus, H. Kruse, R. Di Remigio,
+    A. Alenaizan, A. M. James, S. Lehtola, J. P. Misiewicz, M. Scheurer,
+    R. A. Shaw, J. B. Schriber, Y. Xie, Z. L. Glick, D. A. Sirianni,
+    J. S. O'Brien, J. M. Waldrop, A. Kumar, E. G. Hohenstein,
+    B. P. Pritchard, B. R. Brooks, H. F. Schaefer III, A. Yu. Sokolov,
+    K. Patkowski, A. E. DePrince III, U. Bozkaya, R. A. King,
+    F. A. Evangelista, J. M. Turney, T. D. Crawford, C. D. Sherrill,
+    J. Chem. Phys. 152(18) 184108 (2020). https://doi.org/10.1063/5.0006002
+
+                            Additional Code Authors
+    E. T. Seidl, C. L. Janssen, E. F. Valeev, M. L. Leininger,
+    J. F. Gonthier, R. M. Richard, H. R. McAlexander, M. Saitow, X. Wang,
+    P. Verma, M. H. Lechner, A. Jiang, S. Behnle, A. G. Heide,
+    M. F. Herbst, and D. L. Poole
+
+             Previous Authors, Complete List of Code Contributors,
+                       and Citations for Specific Modules
+    https://github.com/psi4/psi4/blob/master/codemeta.json
+    https://github.com/psi4/psi4/graphs/contributors
+    http://psicode.org/psi4manual/master/introduction.html#citing-psifour
+
+    -----------------------------------------------------------------------
+
+
+    Psi4 started on: Friday, 29 March 2024 01:31PM
+
+    Process ID: 56192
+    Host:       CHEMYY31VALT
+    PSIDATADIR: /Users/jfoley19/Code/psi4/objdir-Release/stage/share/psi4
+    Memory:     500.0 MiB
+    Threads:    1
+    
+  ==> Input File <==
+
+--------------------------------------------------------------------------
+molecule hf {
+H
+F 1 0.9
+
+}
+
+set basis 6-311++G**
+optimize('ccsd', dertype='energy')
+--------------------------------------------------------------------------
+
+Scratch directory: /tmp/
+
+         ----------------------------------------------------------
+                                   FINDIF
+                     R. A. King and Jonathon Misiewicz
+         ----------------------------------------------------------
+
+  Using finite-differences of energies to determine gradients.
+    Generating geometries for use with 3-point formula.
+    Displacement size will be 5.00e-03.
+    Number of atoms is 2.
+    Number of symmetric SALCs is 1.
+    Translations projected? 1. Rotations projected? 1.
+    Number of geometries (including reference) is 3.
+ 3 displacements needed ...
+
+  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+  //    FiniteDifference Computations  //
+  //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
+
+
+Traceback (most recent call last):
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/bin/psi4", line 372, in <module>
+    exec(content)
+  File "<string>", line 24, in <module>
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/psi4/driver/driver.py", line 1239, in optimize
+    G, wfn = gradient(lowername, return_wfn=True, molecule=molecule, **kwargs)
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/psi4/driver/driver.py", line 606, in gradient
+    plan.compute()
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/psi4/driver/driver_findif.py", line 1314, in compute
+    t.compute(client=client)
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/psi4/driver/task_base.py", line 206, in compute
+    self.result = qcng.compute(
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/qcengine/compute.py", line 100, in compute
+    config = get_config(task_config=task_config)
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/qcengine/config.py", line 301, in get_config
+    node = get_node_descriptor(hostname)
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/qcengine/config.py", line 242, in get_node_descriptor
+    hostname = get_global("hostname")
+  File "/Users/jfoley19/Code/psi4/objdir-Release/stage/lib/qcengine/config.py", line 30, in get_global
+    import cpuinfo
+
+ModuleNotFoundError: No module named 'cpuinfo'
+
+
+Printing out the relevant lines from the Psithon --> Python processed input file:
+    H
+    F 1 0.9
+    ""","hf")
+    core.IO.set_default_namespace("hf")
+    core.set_global_option("BASIS", "6-311++G**")
+--> optimize('ccsd', dertype='energy')
+
+!--------------------------------!
+!                                !
+!  No module named 'cpuinfo'     !
+!                                !
+!--------------------------------!
+
+    Psi4 stopped on: Friday, 29 March 2024 01:31PM
+    Psi4 wall time for execution: 0:00:00.45
+
+*** Psi4 encountered an error. Buy a developer more coffee!
+*** Resources and help at github.com/psi4/psi4.
