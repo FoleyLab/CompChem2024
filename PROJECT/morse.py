@@ -275,6 +275,28 @@ class Morse:
         coupling_val = ci * z * deltaE * A0 * x_val * (np.sqrt(ket_p + 1 ) * (bra_p == ket_p + 1) + np.sqrt(ket_p) * (bra_p == ket_p - 1))
         return coupling_val
     
+    def compute_coupling_element_d_dot_E(self, bra_m, bra_p, ket_m, ket_p):
+        """ Function to compute the matrix elements  
+        i \omega z <m|<p| \hat{x} \hat{A} | p'>|m'> = i * omega * z * A_0 <m|\hat{x}|m'> * <p|(b^+ + b)|p'>
+        """
+        # imaginary unit
+        ci = 0+1j
+        
+        # charge
+        z = self.q_au
+
+        # omega
+        omega = self.omega_p
+        
+        # magnitude of vector potential
+        A0 = self.A0_au
+
+        # <m|\hat{x}|m'>
+        x_val = self.position_matrix_element(bra_m, ket_m)
+
+        coupling_val = ci * z * omega * A0 * x_val * (np.sqrt(ket_p + 1 ) * (bra_p == ket_p + 1) - np.sqrt(ket_p) * (bra_p == ket_p - 1))
+        return coupling_val
+    
     def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
             (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
@@ -290,6 +312,21 @@ class Morse:
 
             # compute the matrix element
             val = (z ** 2 / m * A0 + omega) * (ket_m + 1/2)
+
+        return val
+    
+    def compute_photon_element_d_dot_E(self, bra_m, bra_p, ket_m, ket_p):
+        """ Function to compute the matrix elements
+            (omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
+        """
+        # must be diagonal
+        val = 0
+        if bra_m == ket_m and bra_p == ket_p:
+            # collect terms
+            omega = self.omega_p
+
+            # compute the matrix element
+            val = omega * (ket_m + 1/2)
 
         return val
     
