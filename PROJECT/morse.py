@@ -323,6 +323,23 @@ class Morse:
         coupling_val = -1 * z * omega * A0 * x_val * (np.sqrt(ket_p + 1 ) * (bra_p == ket_p + 1) + np.sqrt(ket_p) * (bra_p == ket_p - 1))
         return coupling_val
     
+    #def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
+    #    """ Function to compute the matrix elements
+    #        (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
+    #    """
+    #    # must be diagonal
+    #    val = 0
+    #    if bra_m == ket_m and bra_p == ket_p:
+    #        # collect terms
+    #        z = self.q_au
+    #        A0 = self.A0_au
+    #        omega = self.omega_p
+    #        m = self.mu_au
+    #        # compute the matrix element
+    #        val = (z ** 2 / m * A0 + omega) * (ket_m + 1/2)
+    #    return val
+    
+
     def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
             (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
@@ -337,7 +354,9 @@ class Morse:
             m = self.mu_au
 
             # compute the matrix element
-            val = (z ** 2 / m * A0 + omega) * (ket_m + 1/2)
+            term1 = omega * (ket_m + 1/2)
+            term2 = z ** 2 * A0 ** 2 / (2 * m) 
+            val = (term1 + term2) * (ket_p + 1/2)
 
         return val
     
@@ -372,7 +391,7 @@ class Morse:
             omega = self.omega_p
 
             # compute the matrix element
-            val = omega * (ket_m + 1/2)
+            val = omega * (ket_p + 1/2)
 
         return val
     
@@ -458,7 +477,11 @@ class Morse:
         self.build_basis()
         dim = len(self.basis)
 
-        self.H_PF = np.zeros((dim,dim), dtype=complex)
+        self.H_PF = np.zeros((dim,dim))
+        self.H_matter = np.zeros((dim,dim))
+        self.H_pho = np.zeros((dim,dim))
+        self.H_coup = np.zeros((dim,dim))
+        self.H_dse = np.zeros((dim,dim))
         for i in range(dim):
             bra_m = self.basis[i][0]
             bra_p = self.basis[i][1]
@@ -466,11 +489,11 @@ class Morse:
                 ket_m = self.basis[j][0]
                 ket_p = self.basis[j][1]
 
-                H_matter = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
-                H_dse   = self.compute_dipole_self_energy_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
-                H_pho    = self.compute_photon_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
-                H_coup   = self.compute_coupling_element_PF(bra_m, bra_p, ket_m, ket_p)
-                self.H_PF[i,j] = H_matter + H_dse + H_pho + H_coup
+                self.H_matter[i,j] = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
+                self.H_dse[i,j]   = self.compute_dipole_self_energy_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
+                self.H_pho [i,j]   = self.compute_photon_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
+                self.H_coup[i,j]   = self.compute_coupling_element_PF(bra_m, bra_p, ket_m, ket_p)
+                self.H_PF[i,j] = self.H_matter[i,j] + self.H_dse[i,j] + self.H_pho[i,j] + self.H_coup[i,j]
 
 
 
