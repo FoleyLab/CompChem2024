@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy import linalg as la
 
 def compute_matter_matrix_element(bra_nm, bra_np, ket_nm, ket_np, k, mu):
     hbar = 1 # this is atomic units!
@@ -32,12 +32,13 @@ def compute_photon_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_p, z_
     
 
 
-def compute_interaction_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_p, z_charge, A0, k, mu):
+def compute_interaction_matrix_element(bra_nm, bra_np, ket_nm, ket_np, omega_p, z_charge, A0, k, mu):
     hbar = 1 # plancks constant / 2 * pi in atomic units
     omega_m = np.sqrt( k / mu) 
     p0 = 1j * np.sqrt(mu * hbar * omega_m / 2)
     
     fac = -z_charge * A0 * p0 / mu
+    print(F'pda fact is {fac}')
     
     # matter terms
     if bra_nm == ket_nm+1:
@@ -46,7 +47,7 @@ def compute_interaction_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_
         term_1 = 0
      
     if bra_nm == ket_nm-1:
-        term_2 = np.sqrt(ket_nm)
+        term_2 = -np.sqrt(ket_nm)
     else:
         term_2 = 0
     
@@ -57,7 +58,7 @@ def compute_interaction_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_
         term_3 = 0
         
     if bra_np == ket_np-1:
-        term_4 = np.sqrt(ket_nm)
+        term_4 = np.sqrt(ket_np)
     else:
         term_4 = 0
         
@@ -65,7 +66,7 @@ def compute_interaction_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_
 
 
     
-def compute_interaction_matrix_element(bra_nm, bra_np, ket_nm, ket_np, omega_p, z_charge, A0, k, mu):
+def compute_interaction_matrix_element_PF(bra_nm, bra_np, ket_nm, ket_np, omega_p, z_charge, A0, k, mu):
     hbar = 1 # plancks constant / 2 * pi in atomic units
     omega_m = np.sqrt( k / mu) 
     x0 = np.sqrt( 1 / (2 * mu * omega_m))
@@ -90,7 +91,7 @@ def compute_interaction_matrix_element(bra_nm, bra_np, ket_nm, ket_np, omega_p, 
         term_3 = 0
         
     if bra_np == ket_np-1:
-        term_4 = np.sqrt(ket_nm)
+        term_4 = np.sqrt(ket_np)
     else:
         term_4 = 0
         
@@ -133,7 +134,7 @@ k_val = 1
 mu_val = 1
 z_val = 1
 omega_p_val = 1
-A0_val = 0.
+A0_val = 0.01
 
 H_pda = np.zeros((4,4), dtype=complex)
 print(H_pda)
@@ -152,12 +153,10 @@ for ket in basis_array:
         print(H_i_element)
         H_pda[bra_idx, ket_idx] = H_m_element + H_p_element + H_i_element
         bra_idx = bra_idx + 1
-    ket_idx = ket_idx + 1 #ket_idx += 1
+    ket_idx = ket_idx + 1 
     
-print(np.real(H_pda))
-        
-    
-        
+print(np.imag(H_pda))
+
     
         
     
