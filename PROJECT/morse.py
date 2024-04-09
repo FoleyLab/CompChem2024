@@ -361,9 +361,9 @@ class Morse:
         return val
     
 
-    def compute_dipole_self_energy_element_d_dot_E(self, bra_m, bra_p, ket_m, ket_p):
+    def compute_dipole_self_energy_element(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
-            (omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
+            
         """
         # must be diagonal
         val = 0
@@ -495,13 +495,6 @@ class Morse:
                 self.H_coup[i,j]   = self.compute_coupling_element_PF(bra_m, bra_p, ket_m, ket_p)
                 self.H_PF[i,j] = self.H_matter[i,j] + self.H_dse[i,j] + self.H_pho[i,j] + self.H_coup[i,j]
 
-
-
-    
-
-
-
-    
     def position_matrix_element(self, i, j):
         """ A function to compute position matrix elements between states i and j using grid x
 
@@ -527,6 +520,35 @@ class Morse:
         self.calc_psi_z(j)
         psi_j = self.psi_au
         integrand = psi_i * (self.r_au - self.r_eq_au) * psi_j
+        x_ij = np.trapz(integrand, self.r_au)
+        return x_ij
+    
+    def position_squared_matrix_element(self, i, j):
+        """ A function to compute position squared matrix elements between states i and j using grid x
+
+        Arguments
+        ---------
+        instance : class instance
+            the instance of the class you want to use for the states
+            
+        i : int
+            index of bra state
+
+        j : int
+            index of ket state
+
+        Returns
+        -------
+        x_ij : float
+            the matrix element <i | x^2 | j>
+
+        """
+        self.calc_psi_z(i)
+        psi_i = self.psi_au
+        self.calc_psi_z(j)
+        psi_j = self.psi_au
+        x_hat = self.r_au - self.r_eq_au
+        integrand = psi_i * x_hat * x_hat * psi_j
         x_ij = np.trapz(integrand, self.r_au)
         return x_ij
 
