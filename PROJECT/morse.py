@@ -371,12 +371,12 @@ class Morse:
             # collect terms
             omega = self.omega_p
             z = self.q_au
-            x_val = self.position_matrix_element(bra_m, ket_m)
+            x2_val = self.position_squared_matrix_element(bra_m, ket_m)
             A0 = self.A0_au
 
 
             # compute the matrix element
-            val = omega * (z * x_val * A0) ** 2
+            val = omega * z ** 2 * A0 ** 2 * x2_val
 
         return val
     
@@ -397,7 +397,7 @@ class Morse:
     
     def compute_diamagnetic_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
-            z^2 / 2m * A_0 <m|m'><p | (b^+ b^+ + bb) |p'>
+            z^2 / 2m * A_0 <m|m'><p | (b^+ b^+ + bb + 2 b^+ b + 1) |p'>
         """
         # must be diagonal in matter states
         val = 0
@@ -413,6 +413,9 @@ class Morse:
             # get <p|b^+ b^+ |p'>
             if bra_p == ket_p + 2:
                 val = z ** 2 / (2 * m) * A0 * np.sqrt(ket_p+1) * np.sqrt(ket_p + 2)
+
+            if bra_p == ket_p:
+                val = z ** 2 / m * A0 * (ket_p + 1/2)
 
         return val
     
