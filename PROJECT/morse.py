@@ -323,43 +323,6 @@ class Morse:
         coupling_val = -1 * z * omega * A0 * x_val * (np.sqrt(ket_p + 1 ) * (bra_p == ket_p + 1) + np.sqrt(ket_p) * (bra_p == ket_p - 1))
         return coupling_val
     
-    #def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
-    #    """ Function to compute the matrix elements
-    #        (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
-    #    """
-    #    # must be diagonal
-    #    val = 0
-    #    if bra_m == ket_m and bra_p == ket_p:
-    #        # collect terms
-    #        z = self.q_au
-    #        A0 = self.A0_au
-    #        omega = self.omega_p
-    #        m = self.mu_au
-    #        # compute the matrix element
-    #        val = (z ** 2 / m * A0 + omega) * (ket_m + 1/2)
-    #    return val
-    
-
-    def compute_photon_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
-        """ Function to compute the matrix elements
-            (z^2 / m * A_0 + omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
-        """
-        # must be diagonal
-        val = 0
-        if bra_m == ket_m and bra_p == ket_p:
-            # collect terms
-            z = self.q_au
-            A0 = self.A0_au
-            omega = self.omega_p
-            m = self.mu_au
-
-            # compute the matrix element
-            term1 = omega * (ket_m + 1/2)
-            term2 = z ** 2 * A0 ** 2 / (2 * m) 
-            val = (term1 + term2) * (ket_p + 1/2)
-
-        return val
-    
 
     def compute_dipole_self_energy_element(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
@@ -380,7 +343,7 @@ class Morse:
 
         return val
     
-    def compute_photon_element_d_dot_E(self, bra_m, bra_p, ket_m, ket_p):
+    def compute_photon_element(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
             (omega)  * <m|<p|  (b^+ b + 1/2) | p'>|m'>
         """
@@ -395,29 +358,34 @@ class Morse:
 
         return val
     
-    def compute_diamagnetic_element_p_dot_A(self, bra_m, bra_p, ket_m, ket_p):
+
+    def compute_diamagnetic_element(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
             z^2 / 2m * A_0 <m|m'><p | (b^+ b^+ + bb + 2 b^+ b + 1) |p'>
         """
         # must be diagonal in matter states
+        z = self.q_au
+        A0 = self.A0_au
+        mu = self.mu_au
+
+        fac = z ** 2 * A0 ** 2 / (2 * mu)
+
         val = 0
         if bra_m == ket_m:
-            z = self.q_au
-            A0 = self.A0_au
-            m = self.mu_au
-
-            # get <p|bb|p'>
-            if bra_p == ket_p - 2:
-                val = z ** 2 / (2 * m) * A0 * np.sqrt(ket_p) * np.sqrt(ket_p - 1)
-
-            # get <p|b^+ b^+ |p'>
-            if bra_p == ket_p + 2:
-                val = z ** 2 / (2 * m) * A0 * np.sqrt(ket_p+1) * np.sqrt(ket_p + 2)
-
             if bra_p == ket_p:
-                val = z ** 2 / m * A0 * (ket_p + 1/2)
+                val = 2 * fac * (ket_p + 1/2)
+
+            elif bra_p == ket_p + 2:
+                val = fac * np.sqrt(ket_p + 1) * np.sqrt(ket_p + 2)
+
+            elif bra_p == ket_p - 2:
+                val = fac * np.sqrt(ket_p - 1) * np.sqrt(ket_p - 2)
+
+            else:
+                val = 0
 
         return val
+
     
     def compute_matter_element(self, bra_m, bra_p, ket_m, ket_p):
         """ Function to compute the matrix elements
@@ -451,8 +419,8 @@ class Morse:
                 ket_p = self.basis[j][1]
 
                 H_matter = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
-                H_diam   = self.compute_diamagnetic_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
-                H_pho    = self.compute_photon_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
+                H_diam   = self.compute_diamagnetic_element(bra_m, bra_p, ket_m, ket_p)
+                H_pho    = self.compute_photon_element(bra_m, bra_p, ket_m, ket_p)
                 H_coup   = self.compute_coupling_element_p_dot_A(bra_m, bra_p, ket_m, ket_p)
                 self.H_p_dot_A[i,j] = H_matter + H_diam + H_pho + H_coup
 
@@ -470,8 +438,8 @@ class Morse:
                 ket_p = self.basis[j][1]
 
                 H_matter = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
-                H_dse   = self.compute_dipole_self_energy_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
-                H_pho    = self.compute_photon_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
+                H_dse   = self.compute_dipole_self_energy_element(bra_m, bra_p, ket_m, ket_p)
+                H_pho    = self.compute_photon_element(bra_m, bra_p, ket_m, ket_p)
                 H_coup   = self.compute_coupling_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
                 self.H_d_dot_E[i,j] = H_matter + H_dse + H_pho + H_coup
 
@@ -493,8 +461,8 @@ class Morse:
                 ket_p = self.basis[j][1]
 
                 self.H_matter[i,j] = self.compute_matter_element(bra_m, bra_p, ket_m, ket_p)
-                self.H_dse[i,j]   = self.compute_dipole_self_energy_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
-                self.H_pho [i,j]   = self.compute_photon_element_d_dot_E(bra_m, bra_p, ket_m, ket_p)
+                self.H_dse[i,j]   = self.compute_dipole_self_energy_element(bra_m, bra_p, ket_m, ket_p)
+                self.H_pho [i,j]   = self.compute_photon_element(bra_m, bra_p, ket_m, ket_p)
                 self.H_coup[i,j]   = self.compute_coupling_element_PF(bra_m, bra_p, ket_m, ket_p)
                 self.H_PF[i,j] = self.H_matter[i,j] + self.H_dse[i,j] + self.H_pho[i,j] + self.H_coup[i,j]
 
@@ -522,8 +490,9 @@ class Morse:
         psi_i = self.psi_au
         self.calc_psi_z(j)
         psi_j = self.psi_au
-        integrand = psi_i * (self.r_au - self.r_eq_au) * psi_j
-        x_ij = np.trapz(integrand, self.r_au)
+        x_hat = self.r_au - self.r_eq_au 
+        integrand = psi_i * x_hat * psi_j
+        x_ij = np.trapz(integrand, x_hat)
         return x_ij
     
     def position_squared_matrix_element(self, i, j):
