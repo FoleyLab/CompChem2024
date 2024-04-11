@@ -490,7 +490,10 @@ class Morse:
         psi_i = self.psi_au
         self.calc_psi_z(j)
         psi_j = self.psi_au
-        x_hat = self.r_au - self.r_eq_au 
+        # note that if you displace by r_eq, the dipole expectation
+        # value will be the fluctuation from the "harmonic" value
+        # but this doesn't seem to impact Rabi splitting or absolute energies!
+        x_hat = self.r_au # - self.r_eq_au 
         integrand = psi_i * x_hat * psi_j
         x_ij = np.trapz(integrand, x_hat)
         return x_ij
@@ -519,9 +522,12 @@ class Morse:
         psi_i = self.psi_au
         self.calc_psi_z(j)
         psi_j = self.psi_au
-        x_hat = self.r_au - self.r_eq_au
+        # note that if you displace by r_eq, the dipole expectation
+        # value will be the fluctuation from the "harmonic" value
+        # but this doesn't seem to impact Rabi splitting or absolute energies!
+        x_hat = self.r_au # - self.r_eq_au
         integrand = psi_i * x_hat * x_hat * psi_j
-        x_ij = np.trapz(integrand, self.r_au)
+        x_ij = np.trapz(integrand, x_hat)
         return x_ij
 
     def compute_Morse_transition_au(self, i, f):
