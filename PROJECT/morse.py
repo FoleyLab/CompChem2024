@@ -84,7 +84,7 @@ class Morse:
         self.a = self.calc_a()
         self.lam = np.sqrt(2 * self.mu * self.De) / self.a / hbar
 
-        self.De_au = 
+        #self.De_au = 
 
         # Maximum vibrational quantum number.
         self.vmax = int(np.floor(self.lam - 0.5))
