@@ -1,0 +1,6 @@
+molecule form {
+    pubchem:formaldehyde
+}
+
+set basis cc-pVTZ
+optimize('ccsd(t)', dertype='energy')
